@@ -1,14 +1,16 @@
 #!/usr/bin/python3
-import requests
 from .generator_utils import GeneratorMeta
 import datetime
 from ..utils.headers import get_headers
-import random
 from redis import StrictRedis
 
 # Generator将req_set通过redis传递给downloader
 
 class StockGenerator(GeneratorMeta):
+    """
+    run方法生成urls
+    set_value方法将urls写入redis数据库
+    """
     def __init__(self) -> None:
         # 获取headers
         self.headers = get_headers()
@@ -21,12 +23,13 @@ class StockGenerator(GeneratorMeta):
         req_set = (f"http://quotes.money.163.com/service/chddata.html?code={stock}&start={start_date}&end={end_date}&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;VOTURNOVER;VATURNOVER" for stock in stock_list )
         return req_set
     
-    def set_value(self, value):
-        s = StrictRedis(db=1, decode_responses=True)
+    def set_value(self, value, db=1, key='cache_url'):
+
+        s = StrictRedis(db=db, decode_responses=True)
         for item in value:
-            s.lpush('cache_url', item)
-        # 24h
-        H24 = 3600 * 24
+            s.lpush(key, item)
+        # expire time set to 22h
+        H24 = 3600 * 22
         s.expire('cache_url', H24)
 
 

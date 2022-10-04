@@ -17,3 +17,20 @@ Downloader：下载器。对目标网站发起请求，获取响应内容。
 3. 构建一个scheduler，从redis当中读取url并分配给爬虫用于爬取
 4. downloader，下载器
 5. middleware中间件开发。
+
+## 功能
+
+### StockDataDownloader
+
+### DetailStockDataDownloader
+
+### CompanyinfoDownloader
+
+### US/HK stock downloader
+
+### Shibor data downloader
+
+### GDP/PPI/CPI data downloader
+
+### News Downloader
+
