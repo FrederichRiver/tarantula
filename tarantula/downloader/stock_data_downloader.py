@@ -2,7 +2,7 @@
 
 from .utils import SpiderMeta
 import pandas as pd
-
+from pandas import DataFrame
 
 # 从网易财经获取股票日交易数据csv文件，生成DataFrame数据交给后续使用。
 
@@ -12,7 +12,10 @@ class StockDataDownloader(SpiderMeta):
             'trade_date', 'stock_code', 'stock_name', 'close_price',
             'high_price', 'low_price', 'open_price', 'prev_close_price',
             'change_rate', 'amplitude', 'volume', 'turnover']
-        df = pd.read_csv(url, names=col, header=0, encoding='gb18030', parse_dates=True)
+        try:
+            df = pd.read_csv(url, names=col, header=0, encoding='gb18030', parse_dates=True)
+        except Exception as e:
+            df = DataFrame()
         if not df.empty:
             df.set_index('trade_date', inplace=True)
         return df
