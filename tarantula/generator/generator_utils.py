@@ -1,12 +1,5 @@
 #!/usr/bin/python3
 
-from redis import StrictRedis
-
-
-test = StrictRedis()
-
-result = test.set('url', 'http://www.163.com')
-print(result)
 
 """
 # 生成url

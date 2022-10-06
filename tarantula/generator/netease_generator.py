@@ -1,8 +1,9 @@
 #!/usr/bin/python3
-from .generator_utils import GeneratorMeta
+
 import datetime
-from ..utils.headers import get_headers
 from redis import StrictRedis
+from .generator_utils import GeneratorMeta
+from ..utils.headers import get_headers
 
 # Generator将req_set通过redis传递给downloader
 
@@ -38,14 +39,15 @@ class StockDataGenerator(GeneratorMeta):
         
     def run(self, stock_list, end_date: str, start_date='19901219'):
         # 创建url generator
-        req_set = (f"http://quotes.money.163.com/service/chddata.html?code={stock}&start={start_date}&end={end_date}&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;VOTURNOVER;VATURNOVER" for stock in stock_list )
+        req_set = []
+        for stock, stock2 in stock_list:
+            req_set.append({"stock_code": stock, "stock_code2": stock2, "url":f"http://quotes.money.163.com/service/chddata.html?code={stock2}&start={start_date}&end={end_date}&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;VOTURNOVER;VATURNOVER" })
         return req_set
     
-    def set_value(self, value, db=1, key='cache_url'):
-
+    def set_value(self, value, db=2, key='cache_url'):
         s = StrictRedis(db=db, decode_responses=True)
         for item in value:
-            s.lpush(key, item)
+            s.hmset(item["stock_code"], {"stock_code": item["stock_code"], "stock_code2": item["stock_code2"], "url": item["url"]})
         # expire time set to 22h
         H24 = 3600 * 22
         s.expire(key, H24)

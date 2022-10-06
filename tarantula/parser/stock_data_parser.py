@@ -1,6 +1,9 @@
+#!/usr/bin/python3
 from finance_model.stock_list import stock_code_decoding, index_code_decoding
 from libutils.utils import drop_space
+from libsql_utils.model.stock import get_formStock, formStockManager
 from pandas import DataFrame
+from sqlalchemy.orm import Session
 
 def stock_name_parser(df):
     stock_id = df.iloc[0,0]
@@ -15,30 +18,29 @@ def index_name_parser(df):
     return stock_id, stock_name
 
 
-def stock_data_parser(engine, stock_code: str, stock_name: str, df: DataFrame):
-    from libsql_utils.model.stock import formStock
-    from sqlalchemy.orm import Session
-    line = []
-    formStock.__table__.name = stock_code
-    for index, row in df.iterrows():
-        l = formStock(
-            trade_date=index,
-            stock_code=stock_code,
-            stock_name=stock_name,
-            close_price=row["close_price"],
-            high_price=row["high_price"],
-            low_price=row["low_price"],
-            open_price=row["open_price"],
-            prev_close_price=row["prev_close_price"],
-            change_rate=row["change_rate"],
-            amplitude=row["amplitude"],
-            volume=row["volume"],
-            turnover=row["turnover"]
-        )
-        line.append(l)
+def stock_data_parser(engine, stock_code: str, df: DataFrame):
+    formStock = get_formStock(stock_code)
     with Session(engine) as session:
-        session.add_all(l)
-        session.commit()
+        with session.begin():
+            for index, row in df.iterrows():
+                session.merge(
+                    formStock(
+                    trade_date=index,
+                    stock_name=row["stock_name"],
+                    close_price=row["close_price"],
+                    high_price=row["high_price"],
+                    low_price=row["low_price"],
+                    open_price=row["open_price"],
+                    prev_close_price=row["prev_close_price"],
+                    change_rate=row["change_rate"],
+                    amplitude=row["amplitude"],
+                    volume=row["volume"],
+                    turnover=row["turnover"],
+                    )
+                )
+                update = index
+            session.query(formStockManager).filter_by(stock_code==stock_code).update({"update_date": update})
+            session.commit()
 
 
 # import datetime
