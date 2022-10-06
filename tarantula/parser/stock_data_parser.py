@@ -39,7 +39,7 @@ def stock_data_parser(engine, stock_code: str, df: DataFrame):
                     )
                 )
                 update = index
-            session.query(formStockManager).filter_by(stock_code==stock_code).update({"update_date": update})
+            session.query(formStockManager).filter(formStockManager.stock_code==stock_code).update({"update_date": update})
             session.commit()
 
 

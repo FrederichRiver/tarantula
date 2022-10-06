@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 from dev_global.env import GITHUB_URL, EMAIL
 
-v = (0, 0, 2)
+v = (1, 3, 4)
 
 setup(
         name='tarantula',

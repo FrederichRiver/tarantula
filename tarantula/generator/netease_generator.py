@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-
 import datetime
 from redis import StrictRedis
 from .generator_utils import GeneratorMeta
-from ..utils.headers import get_headers
 
 # Generator将req_set通过redis传递给downloader
 
@@ -11,11 +9,7 @@ class StockGenerator(GeneratorMeta):
     """
     run方法生成urls
     set_value方法将urls写入redis数据库
-    """
-    def __init__(self) -> None:
-        # 获取headers
-        self.headers = get_headers()
-        
+    """       
     def run(self, stock_list):
         # 创建url generator
         start_date = '19901219'
@@ -33,10 +27,7 @@ class StockGenerator(GeneratorMeta):
         s.expire(key, H24)
 
 class StockDataGenerator(GeneratorMeta):
-    def __init__(self) -> None:
-        # 获取headers
-        self.headers = get_headers()
-        
+      
     def run(self, stock_list, end_date: str, start_date='19901219'):
         # 创建url generator
         req_set = []
