@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pandas as pd
 import requests
+from basic_util.log import dlog
 from lxml import etree
 from pandas import DataFrame
 
@@ -16,7 +17,7 @@ class SpiderMeta(object):
         response = requests.get(url, headers=header)
         return response
 
-
+@dlog
 def get_html(response) -> etree.HTML:
     """
     result is a etree.HTML object

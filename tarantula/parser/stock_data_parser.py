@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from basic_util.log import dlog, Log
 from finance_model.stock_list import stock_code_decoding, index_code_decoding
 from libutils.utils import drop_space
 from libsql_utils.model.stock import get_formStock, formStockManager
@@ -17,7 +18,7 @@ def index_name_parser(df):
     stock_name = drop_space(df.iloc[0,1])
     return stock_id, stock_name
 
-
+@dlog
 def stock_data_parser(engine, stock_code: str, df: DataFrame):
     formStock = get_formStock(stock_code)
     with Session(engine) as session:

@@ -39,3 +39,8 @@ class UserHeaders(object):
     
     def __str__(self) -> str:
         return str(self.__call__())
+
+
+if __name__ == '__main__':
+    header = UserHeaders()
+    print(header())

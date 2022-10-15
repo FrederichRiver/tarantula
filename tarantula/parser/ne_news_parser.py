@@ -15,33 +15,62 @@ def concat_url(url):
         return ''
 
 # 匹配网易article文章
-Rex1 = re.compile(r'\S*article/\S*.html')
+Regx1 = re.compile(r'\S*/money/article/\S*.html')
+Regx2 = re.compile(r'\S*/dy/article/\S*.html')
+Regx3 = re.compile(r'\S*/money.163.com/\d{2}/\d{4}/\d{2}/\S*.html')
+Regx4 = re.compile(r'\S*/money.163.com/(special|fund|chanjing|yihuiman|ipo|stock)')
+Regx5 = re.compile(r'\S*/dy/article/\S*.html')
 
-def ne_news_parser(html, rds):
+"""
+网易公开课
+vip.open.163.com/courses/xxx
+网易财经
+/money.163.com/
+/www.163.com/money/article/
+网易手机财经
+i.money.163.com
+网易大鱼媒体
+www.163.com/dy/media
+网易视频
+www.163.com/v/video
+网易旅游频道
+travel.163.com
+
+"""
+
+def ne_news_parser(rds: StrictRedis, html):
     """
     解析来自www.163.com的网页，提取url并保存至redis数据库
+    Oct 9进行更详细的频道分类
     """
-    rds = StrictRedis('localhost', db=4)
     url_set = html.xpath('//a//@href')
-    for url in url_set:  
-        if re.search('money.163.com', url):
+    for url in url_set:
+        if re.search(Regx1, url):
+            # Regx1 = re.compile(r'\S*/money/article/\S*.html')
+            url = concat_url(url)
+            i = rds.sadd('article_page', url)
+        elif re.search(Regx3, url):
+            # Regx3 = re.compile(r'\S*/money.163.com/\d{2}/\d{4}/\d{2}/\S*.html')
+            url = concat_url(url)
+            i = rds.sadd('article_page', url)
+        elif re.search(Regx5, url):
+            # Regx3 = re.compile(r'\S*/dy/article/\S*.html')
+            url = concat_url(url)
+            i = rds.sadd('dy_page', url)
+        elif re.search(Regx4, url):
+            # Regx4 = re.compile(r'\S*/money.163.com/(special|fund|chanjing|yihuiman|ipo|stock)')
             url = concat_url(url)
             # send to news source
-            rds.lpush('news_source', url)
-        elif re.search(Rex1, url):
-            # send to article page
+            i = rds.sadd("news_source", url)
+        else:
             url = concat_url(url)
-            rds.lpush('article_page', url)
-        # else:
-        #     print(concat_url(url))
+            i = rds.sadd("other_url", url)  
 
 def ne_article_parser(html):
     title = get_title(html)
     post_time = get_post_time(html)
     content = get_content(html)
     return title, post_time, content
-
-
 
 
 def get_title(html):
@@ -73,3 +102,5 @@ def get_post_time(html):
         if result := re.search(regex_date, s):
             post_time = result[0]
     return post_time
+
+
